@@ -31,8 +31,10 @@ get '/:number' do |number|
   # Calculate the "previous" and "next" comics, if any
   @data[:previous] = @data[:num] - 1 unless @data[:num] == 1 || @data[:num].nil?
   unless Time.now.year == @data[:year] && Time.now.month == @data[:month] && Time.now.day == @data[:day]
-    @data[:next] = @data[:num] + 1
+    @data[:next] = @data[:num] + 1 unless @data[:num].nil?
   end
+
+  return haml :data
 
   # Render the page
   haml :comic
