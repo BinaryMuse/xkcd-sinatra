@@ -24,7 +24,7 @@ get '/:number' do |number|
   end
 
   # Parse the JSON into data
-  @data = JSON::parse(@data, :symbolize_names => true)
+  @data = symbolize_keys(JSON::parse(@data))
 
   # Turn the "year", "month", and "day" properties into numbers
   [:year, :month, :day].each { |key| @data[key] = @data[key].to_i }
@@ -34,10 +34,25 @@ get '/:number' do |number|
     @data[:next] = @data[:num] + 1 unless @data[:num].nil?
   end
 
-  return haml :data
-
   # Render the page
   haml :comic
+end
+
+# change string keys into symbols
+def symbolize_keys(arg)
+  case arg
+  when Array
+    arg.map { |elem| symbolize_keys elem }
+  when Hash
+    Hash[
+      arg.map { |key, value|
+        k = key.is_a?(String) ? key.to_sym : key
+        v = symbolize_keys value
+        [k,v]
+      }]
+  else
+    arg
+  end
 end
 
 __END__
