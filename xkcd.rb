@@ -29,7 +29,7 @@ get '/:number' do |number|
   # Turn the "year", "month", and "day" properties into numbers
   [:year, :month, :day].each { |key| @data[key] = @data[key].to_i }
   # Calculate the "previous" and "next" comics, if any
-  @data[:previous] = @data[:num] - 1 unless @data[:num] == 1
+  @data[:previous] = @data[:num] - 1 unless @data[:num] == 1 || @data[:num].nil?
   unless Time.now.year == @data[:year] && Time.now.month == @data[:month] && Time.now.day == @data[:day]
     @data[:next] = @data[:num] + 1
   end
@@ -46,6 +46,10 @@ __END__
     %title xkcd mini: #{@data[:safe_title]}
   %body
     = yield
+
+@@ data
+%pre
+  = @data.inspect
 
 @@ comic
 %h1= @data[:safe_title]
