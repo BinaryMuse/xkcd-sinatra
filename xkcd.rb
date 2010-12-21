@@ -1,6 +1,7 @@
 require 'net/http'
 require 'uri'
 require 'sinatra'
+require 'sinatra/reloader'
 require 'json'
 require 'haml'
 
@@ -11,20 +12,29 @@ end
 
 # Index redirects to /0
 get '/' do
-  redirect '/0'
+  return do_comic(:current)
 end
 
 get '/:number' do |number|
+  return do_comic(number)
+end
+
+def do_comic(number)
   # If the comic number is 0, get today's comic
   # Else get the given comic
-  if number == "0"
-    @data = Net::HTTP.get(URI.parse("http://xkcd.com/info.0.json"))
-  else
-    @data = Net::HTTP.get(URI.parse("http://xkcd.com/#{number}/info.0.json"))
-  end
+  begin
+    if number == :current
+      @data = Net::HTTP.get(URI.parse("http://xkcd.com/info.0.json"))
+    else
+      @data = Net::HTTP.get(URI.parse("http://xkcd.com/#{number}/info.0.json"))
+    end
 
-  # Parse the JSON into data
-  @data = symbolize_keys(JSON::parse(@data))
+    # Parse the JSON into data
+    @data = symbolize_keys(JSON::parse(@data))
+  rescue
+    @data = {:safe_title => "Not Found" }
+    return haml :error
+  end
 
   # Turn the "year", "month", and "day" properties into numbers
   [:year, :month, :day].each { |key| @data[key] = @data[key].to_i }
@@ -64,21 +74,30 @@ __END__
   %body
     = yield
 
-@@ data
-%pre
-  = @data.inspect
+@@ error
+%h1 Not Found
+%p
+  That comic was not found.
+%p
+  %a{:href => "/"} Home
 
 @@ comic
 %h1= @data[:safe_title]
 %p
   - unless @data[:previous].nil?
+    %a{:href => "/1"}
+      &lt;&lt; First
+    &nbsp;|&nbsp;
     %a{:href => "/#{@data[:previous]}"}
-      Previous
+      &lt; Previous
   - unless @data[:previous].nil? || @data[:next].nil?
     &nbsp;|&nbsp;
   - unless @data[:next].nil?
     %a{:href => "/#{@data[:next]}"}
-      Next
+      Next &gt;
+    &nbsp;|&nbsp;
+    %a{:href => "/"}
+      Last &gt;&gt;
 %p
   %img{:src => @data[:img]}
 %p= @data[:alt]
