@@ -9,7 +9,15 @@ get '/favicon.ico' do
   nil
 end
 
-# Index redirects to /0
+# Random gets a random comic
+get '/random' do
+  current = symbolize_keys(JSON::parse(get_comic_json(:current)))
+  current = current[:num]
+  random = rand(current) + 1
+  redirect "/#{random}"
+end
+
+# Index gets the current comic
 get '/' do
   return do_comic(:current)
 end
@@ -19,19 +27,12 @@ get '/:number' do |number|
 end
 
 def do_comic(number)
-  # If the comic number is 0, get today's comic
-  # Else get the given comic
   begin
-    if number == :current
-      @data = Net::HTTP.get(URI.parse("http://xkcd.com/info.0.json"))
-    else
-      @data = Net::HTTP.get(URI.parse("http://xkcd.com/#{number}/info.0.json"))
-    end
-
-    # Parse the JSON into data
-    @data = symbolize_keys(JSON::parse(@data))
+    # Get the JSON data
+    current = symbolize_keys(JSON::parse(get_comic_json(:current)))
+    @data   = symbolize_keys(JSON::parse(get_comic_json(number)))
   rescue
-    @data = {:safe_title => "Not Found" }
+    @data = { :safe_title => "Not Found" }
     return haml :error
   end
 
@@ -39,12 +40,22 @@ def do_comic(number)
   [:year, :month, :day].each { |key| @data[key] = @data[key].to_i }
   # Calculate the "previous" and "next" comics, if any
   @data[:previous] = @data[:num] - 1 unless @data[:num] == 1 || @data[:num].nil?
-  unless Time.now.year == @data[:year] && Time.now.month == @data[:month] && Time.now.day == @data[:day]
+  unless current[:num] == @data[:num]
     @data[:next] = @data[:num] + 1 unless @data[:num].nil?
   end
 
   # Render the page
   haml :comic
+end
+
+# If the comic number is 0, get today's comic
+# Else get the given comic
+def get_comic_json(number)
+  if number == :current
+    Net::HTTP.get(URI.parse("http://xkcd.com/info.0.json"))
+  else
+    Net::HTTP.get(URI.parse("http://xkcd.com/#{number}/info.0.json"))
+  end
 end
 
 # change string keys into symbols
@@ -93,6 +104,9 @@ __END__
     &lt;&lt; First
     &nbsp;|&nbsp;
     &lt; Previous
+  &nbsp;|&nbsp;
+  %a{:href => "/random"}
+    Random
   &nbsp;|&nbsp;
   - unless @data[:next].nil?
     %a{:href => "/#{@data[:next]}"}
