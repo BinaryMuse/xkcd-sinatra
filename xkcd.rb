@@ -89,30 +89,30 @@ __END__
 %p
   That comic was not found.
 %p
-  %a{:href => "/"} Home
+  %a{:href => "/"}Home
 
 @@ comic
 %h1= @data[:safe_title]
 %p
   - unless @data[:previous].nil?
-    %a{:href => "/1"}
+    %a{:href => "/1"}<
       &lt;&lt; First
     &nbsp;|&nbsp;
-    %a{:href => "/#{@data[:previous]}"}
+    %a{:href => "/#{@data[:previous]}"}<
       &lt; Previous
   - else
     &lt;&lt; First
     &nbsp;|&nbsp;
     &lt; Previous
   &nbsp;|&nbsp;
-  %a{:href => "/random"}
+  %a{:href => "/random"}<
     Random
   &nbsp;|&nbsp;
   - unless @data[:next].nil?
-    %a{:href => "/#{@data[:next]}"}
+    %a{:href => "/#{@data[:next]}"}<
       Next &gt;
     &nbsp;|&nbsp;
-    %a{:href => "/"}
+    %a{:href => "/"}<
       Last &gt;&gt;
   - else
     Next &gt;
