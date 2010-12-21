@@ -14,6 +14,10 @@ get '/random' do
   current = symbolize_keys(JSON::parse(get_comic_json(:current)))
   current = current[:num]
   random = rand(current) + 1
+  # Make sure we don't hit 404, which is XKCD's actual 404 page.
+  while random == 404
+    random = rand(current) + 1
+  end
   redirect "/#{random}"
 end
 
@@ -43,6 +47,10 @@ def do_comic(number)
   unless current[:num] == @data[:num]
     @data[:next] = @data[:num] + 1 unless @data[:num].nil?
   end
+
+  # Make sure we don't hit 404, which is XKCD's actual 404 page.
+  @data[:previous] -= 1 if @data[:previous] == 404
+  @data[:next]     += 1 if @data[:next]     == 404
 
   # Render the page
   haml :comic
