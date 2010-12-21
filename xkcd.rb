@@ -89,14 +89,21 @@ __END__
     &nbsp;|&nbsp;
     %a{:href => "/#{@data[:previous]}"}
       &lt; Previous
-  - unless @data[:previous].nil? || @data[:next].nil?
+  - else
+    &lt;&lt; First
     &nbsp;|&nbsp;
+    &lt; Previous
+  &nbsp;|&nbsp;
   - unless @data[:next].nil?
     %a{:href => "/#{@data[:next]}"}
       Next &gt;
     &nbsp;|&nbsp;
     %a{:href => "/"}
       Last &gt;&gt;
+  - else
+    Next &gt;
+    &nbsp;|&nbsp;
+    Last &gt;&gt;
 %p
   %img{:src => @data[:img]}
 %p= @data[:alt]
