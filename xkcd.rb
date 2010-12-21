@@ -1,7 +1,6 @@
 require 'net/http'
 require 'uri'
 require 'sinatra'
-require 'sinatra/reloader'
 require 'json'
 require 'haml'
 
