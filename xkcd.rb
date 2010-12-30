@@ -129,3 +129,7 @@ __END__
 %p
   %img{:src => @data[:img]}
 %p= @data[:alt]
+%hr
+%p
+  Read this comic on
+  %a{:href => "http://xkcd.com/#{@data[:num]}"}xkcd.com
